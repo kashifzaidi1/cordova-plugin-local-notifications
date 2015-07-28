@@ -116,16 +116,18 @@ module.exports = function (context) {
         "                          object:settings];\n" +
         "}\n" +
 
-        "- (void)application:(UIApplication *) application handleActionWithIdentifier: (NSString *) identifier " +
-        " forLocalNotification: (NSDictionary *) notification " +
-        "  completionHandler: (void (^)()) completionHandler { " +
-        "    if ([identifier isEqualToString: @\"MODO_other\"]) {" +
-        "        NSString *script = @\"alert('test alert')\"; \n" +
-        "        [self.viewController.webView stringByEvaluatingJavaScriptFromString:script]; "+
-        "    } \n" +
-        "    // Must be called when finished \n" +
-        "    completionHandler(); \n" +
-        "}\n" +
+        "- (void)application:(UIApplication *) application handleActionWithIdentifier: (NSString *) identifier \n"+
+        "forLocalNotification: (NSDictionary *) notification \n"+
+        "  completionHandler: (void (^)()) completionHandler { \n"+
+        "     \n"+
+        "    if ([identifier isEqualToString: @\"MODO_other\"]) { \n"+
+        "        NSString *script = @\"alert('hello');\"; \n"+
+        "        [self.viewController.webView stringByEvaluatingJavaScriptFromString:script]; \n"+
+        "    } \n"+
+        "     \n"+
+        "    // Must be called when finished \n"+
+        "    completionHandler(); \n"+
+        "} \n"+
         "#endif\n";
 
     // Inserts the constant decleration
