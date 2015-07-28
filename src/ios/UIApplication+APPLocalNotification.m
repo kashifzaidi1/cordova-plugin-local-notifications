@@ -59,19 +59,79 @@
     if ([[UIApplication sharedApplication]
          respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
-        UIUserNotificationType types;
-        UIUserNotificationSettings *settings;
+         UIMutableUserNotificationAction *repeatMoodAction = [[UIMutableUserNotificationAction alloc] init];
+        repeatMoodAction.identifier = @"MODO_repeat_mood";
+        repeatMoodAction.title = @"Report Last Mood";
+        repeatMoodAction.activationMode = UIUserNotificationActivationModeBackground;
+        repeatMoodAction.destructive = NO;
+        repeatMoodAction.authenticationRequired = NO;
+        
+        UIMutableUserNotificationAction *openAppAction = [[UIMutableUserNotificationAction alloc] init];
+        openAppAction.identifier = @"MODO_other";
+        openAppAction.title = @"Other";
+        openAppAction.activationMode = UIUserNotificationActivationModeForeground;
+        openAppAction.destructive = NO;
+        openAppAction.authenticationRequired = NO;
+        
+        UIMutableUserNotificationAction *sadAction = [[UIMutableUserNotificationAction alloc] init];
+        sadAction.identifier = @"MODO_sad";
+        sadAction.title = @"Sad";
+        sadAction.activationMode = UIUserNotificationActivationModeBackground;
+        sadAction.destructive = NO;
+        sadAction.authenticationRequired = NO;
+        
+        UIMutableUserNotificationAction *happyAction = [[UIMutableUserNotificationAction alloc] init];
+        happyAction.identifier = @"MODO_happy";
+        happyAction.title = @"Happy";
+        happyAction.activationMode = UIUserNotificationActivationModeBackground;
+        happyAction.destructive = NO;
+        happyAction.authenticationRequired = NO;
+        
+        UIMutableUserNotificationAction *depressedAction = [[UIMutableUserNotificationAction alloc] init];
+        depressedAction.identifier = @"MODO_depressed";
+        depressedAction.title = @"Depressed";
+        depressedAction.activationMode = UIUserNotificationActivationModeBackground;
+        depressedAction.destructive = NO;
+        depressedAction.authenticationRequired = NO;
+        
+        UIMutableUserNotificationAction *okAction = [[UIMutableUserNotificationAction alloc] init];
+        okAction.identifier = @"MODO_ok";
+        okAction.title = @"OK";
+        okAction.activationMode = UIUserNotificationActivationModeBackground;
+        okAction.destructive = NO;
+        okAction.authenticationRequired = NO;
+        
+        UIMutableUserNotificationCategory *inviteCategory = [[UIMutableUserNotificationCategory alloc] init];
+        
+        
+        
+        inviteCategory.identifier = @"MODO_CATEGORY";
+        [inviteCategory setActions:@[sadAction, happyAction, okAction, depressedAction]
+                        forContext:UIUserNotificationActionContextDefault];
+        
+        [inviteCategory setActions:@[repeatMoodAction, openAppAction]
+                        forContext:UIUserNotificationActionContextMinimal];
+        
+        NSSet *categories = [NSSet setWithObjects:inviteCategory, nil];
+        
+        UIUserNotificationType types = UIUserNotificationTypeAlert| UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
+        
+        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:types categories:categories];
+        
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+        // UIUserNotificationType types;
+        // UIUserNotificationSettings *settings;
 
-        settings = [[UIApplication sharedApplication]
-                    currentUserNotificationSettings];
+        // settings = [[UIApplication sharedApplication]
+        //             currentUserNotificationSettings];
 
-        types = settings.types|UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound;
+        // types = settings.types|UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound;
 
-        settings = [UIUserNotificationSettings settingsForTypes:types
-                                                     categories:nil];
+        // settings = [UIUserNotificationSettings settingsForTypes:types
+        //                                              categories:nil];
 
-        [[UIApplication sharedApplication]
-         registerUserNotificationSettings:settings];
+        // [[UIApplication sharedApplication]
+        //  registerUserNotificationSettings:settings];
     }
 }
 

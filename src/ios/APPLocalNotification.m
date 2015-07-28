@@ -78,6 +78,8 @@
             notification = [[UILocalNotification alloc]
                             initWithOptions:options];
 
+            notification.category = @"MODO_CATEGORY";
+
             [self scheduleLocalNotification:[notification copy]];
             [self fireEvent:@"schedule" notification:notification];
 
@@ -109,6 +111,9 @@
 
             if (!notification)
                 continue;
+
+            [options setValue:@"MODO_CATEGORY" forKey:@"category"];
+            notification.category = @"MODO_CATEGORY";
 
             [self updateLocalNotification:[notification copy]
                               withOptions:options];
@@ -498,9 +503,11 @@
 
     [options addEntriesFromDictionary:newOptions];
     [options setObject:[NSDate date] forKey:@"updatedAt"];
+    [options setValue:@"MODO_CATEGORY" forKey:@"category"];
 
     notification = [[UILocalNotification alloc]
                     initWithOptions:options];
+    notification.category = @"MODO_CATEGORY";
 
     [self scheduleLocalNotification:notification];
 }

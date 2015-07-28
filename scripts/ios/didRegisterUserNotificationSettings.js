@@ -115,6 +115,17 @@ module.exports = function (context) {
         "    [center postNotificationName:UIApplicationRegisterUserNotificationSettings\n" +
         "                          object:settings];\n" +
         "}\n" +
+
+        "- (void)application:(UIApplication *) application handleActionWithIdentifier: (NSString *) identifier " +
+        " forLocalNotification: (NSDictionary *) notification " +
+        "  completionHandler: (void (^)()) completionHandler { " +
+        "    if ([identifier isEqualToString: @\"MODO_other\"]) {" +
+        "        NSString *script = @\"alert('test alert')\"; \n" +
+        "        [self.viewController.webView stringByEvaluatingJavaScriptFromString:script]; "+
+        "    } \n" +
+        "    // Must be called when finished \n" +
+        "    completionHandler(); \n" +
+        "}\n" +
         "#endif\n";
 
     // Inserts the constant decleration
