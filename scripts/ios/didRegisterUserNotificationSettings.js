@@ -120,10 +120,23 @@ module.exports = function (context) {
         "forLocalNotification: (NSDictionary *) notification \n"+
         "  completionHandler: (void (^)()) completionHandler { \n"+
         "     \n"+
-        "    if ([identifier isEqualToString: @\"MODO_other\"]) { \n"+
-        "        NSString *script = @\"alert('hello');\"; \n"+
-        "        [self.viewController.webView stringByEvaluatingJavaScriptFromString:script]; \n"+
-        "    } \n"+
+        "   NSDate *now = [NSDate date]; \n"+
+        "   NSTimeInterval nowEpochSeconds = [now timeIntervalSince1970] * 1000; \n"+
+        "    \n"+
+        "   NSString *mood = @\"\"; \n"+
+        "   if([identifier isEqualToString:@\"MODO_repeat_mood\"]) \n"+
+        "       mood = @\"last_mood\"; \n"+
+        "   else if([identifier isEqualToString:@\"MODO_sad\"]) \n"+
+        "       mood = @\"mood_sad\"; \n"+
+        "   else if([identifier isEqualToString:@\"MODO_happy\"]) \n"+
+        "       mood = @\"mood_happy\"; \n"+
+        "   else if([identifier isEqualToString:@\"MODO_depressed\"]) \n"+
+        "       mood = @\"mood_depressed\"; \n"+
+        "   else if([identifier isEqualToString:@\"MODO_ok\"]) \n"+
+        "       mood = @\"mood_ok\"; \n"+
+        "    \n"+
+        "   NSString *script = [NSString stringWithFormat:@\"window.report_mood_interactive('%@',%f);\", mood, nowEpochSeconds]; \n"+
+        "   [self.viewController.commandDelegate evalJs:script]; \n"+
         "     \n"+
         "    // Must be called when finished \n"+
         "    completionHandler(); \n"+
