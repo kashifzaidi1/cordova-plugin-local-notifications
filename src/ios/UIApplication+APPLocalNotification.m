@@ -23,8 +23,51 @@
 
 #import "UIApplication+APPLocalNotification.h"
 #import "UILocalNotification+APPLocalNotification.h"
+#import <objc/runtime.h>
 
 @implementation UIApplication (APPLocalNotification)
+
+NSString const *buttonsKey = @"local.quantimodo.notifications.buttons";
+NSString const *buttonsDataKey = @"local.quantimodo.notifications.buttonsdata";
+NSString const *twoButtonLayoutKey = @"local.quantimodo.notifications.twobuttonlayout";
+NSString const *fourButtonLayoutKey = @"local.quantimodo.notifications.fourbuttonlayout";
+
+- (void)setButtons:(NSMutableArray *)buttons
+{
+    objc_setAssociatedObject(self, &buttonsKey, buttons, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)setButtonsData:(NSMutableDictionary *)buttonsData
+{
+    objc_setAssociatedObject(self, &buttonsDataKey, buttonsData, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)setTwoButtonLayout:(NSMutableArray *)twoButtonLayout
+{
+    objc_setAssociatedObject(self, &twoButtonLayoutKey, twoButtonLayout, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)setFourButtonLayout:(NSMutableArray *)fourButtonLayout
+{
+    objc_setAssociatedObject(self, &fourButtonLayoutKey, fourButtonLayout, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSMutableArray*) buttons{
+    return objc_getAssociatedObject(self, &buttonsKey);
+}
+
+- (NSMutableDictionary*) buttonsData{
+    return objc_getAssociatedObject(self, &buttonsDataKey);
+}
+
+- (NSMutableArray*) twoButtonLayout{
+    return objc_getAssociatedObject(self, &twoButtonLayoutKey);
+}
+
+- (NSMutableArray*) fourButtonLayout{
+    return objc_getAssociatedObject(self, &fourButtonLayoutKey);
+}
+
 
 #pragma mark -
 #pragma mark Permissions
@@ -59,79 +102,73 @@
     if ([[UIApplication sharedApplication]
          respondsToSelector:@selector(registerUserNotificationSettings:)])
     {
-         UIMutableUserNotificationAction *repeatMoodAction = [[UIMutableUserNotificationAction alloc] init];
-        repeatMoodAction.identifier = @"MODO_repeat_mood";
-        repeatMoodAction.title = @"Report Last Mood";
-        repeatMoodAction.activationMode = UIUserNotificationActivationModeBackground;
-        repeatMoodAction.destructive = NO;
-        repeatMoodAction.authenticationRequired = NO;
         
-        UIMutableUserNotificationAction *openAppAction = [[UIMutableUserNotificationAction alloc] init];
-        openAppAction.identifier = @"MODO_other";
-        openAppAction.title = @"Other";
-        openAppAction.activationMode = UIUserNotificationActivationModeForeground;
-        openAppAction.destructive = NO;
-        openAppAction.authenticationRequired = NO;
+        NSURL *xmlURL = [[NSBundle mainBundle] URLForResource:@"config" withExtension:@"xml"];
+        NSXMLParser *parser = [[NSXMLParser alloc] initWithContentsOfURL:xmlURL];
+        [parser setDelegate:self];
+        BOOL success = [parser parse];
         
-        UIMutableUserNotificationAction *sadAction = [[UIMutableUserNotificationAction alloc] init];
-        sadAction.identifier = @"MODO_sad";
-        sadAction.title = @"Sad";
-        sadAction.activationMode = UIUserNotificationActivationModeBackground;
-        sadAction.destructive = NO;
-        sadAction.authenticationRequired = NO;
+        NSMutableDictionary *notificationActions = [[NSMutableDictionary alloc] init];
         
-        UIMutableUserNotificationAction *happyAction = [[UIMutableUserNotificationAction alloc] init];
-        happyAction.identifier = @"MODO_happy";
-        happyAction.title = @"Happy";
-        happyAction.activationMode = UIUserNotificationActivationModeBackground;
-        happyAction.destructive = NO;
-        happyAction.authenticationRequired = NO;
-        
-        UIMutableUserNotificationAction *depressedAction = [[UIMutableUserNotificationAction alloc] init];
-        depressedAction.identifier = @"MODO_depressed";
-        depressedAction.title = @"Depressed";
-        depressedAction.activationMode = UIUserNotificationActivationModeBackground;
-        depressedAction.destructive = NO;
-        depressedAction.authenticationRequired = NO;
-        
-        UIMutableUserNotificationAction *okAction = [[UIMutableUserNotificationAction alloc] init];
-        okAction.identifier = @"MODO_ok";
-        okAction.title = @"OK";
-        okAction.activationMode = UIUserNotificationActivationModeBackground;
-        okAction.destructive = NO;
-        okAction.authenticationRequired = NO;
-        
-        UIMutableUserNotificationCategory *inviteCategory = [[UIMutableUserNotificationCategory alloc] init];
-        
-        
-        
-        inviteCategory.identifier = @"MODO_CATEGORY";
-        [inviteCategory setActions:@[sadAction, happyAction, okAction, depressedAction]
-                        forContext:UIUserNotificationActionContextDefault];
-        
-        [inviteCategory setActions:@[repeatMoodAction, openAppAction]
-                        forContext:UIUserNotificationActionContextMinimal];
-        
-        NSSet *categories = [NSSet setWithObjects:inviteCategory, nil];
-        
-        UIUserNotificationType types = UIUserNotificationTypeAlert| UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
-        
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:types categories:categories];
-        
-        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-        // UIUserNotificationType types;
-        // UIUserNotificationSettings *settings;
+        if(success == YES)
+        {
+            for(NSString *button in [self buttons])
+            {
+                UIMutableUserNotificationAction *current_action = [[UIMutableUserNotificationAction alloc] init];
+                NSDictionary *attributeDict = [self buttonsData][button];
+                current_action.identifier = button;
+                current_action.title = attributeDict[@"display"];
+                current_action.activationMode = ([attributeDict[@"mode"] isEqualToString:@"background"])? UIUserNotificationActivationModeBackground : UIUserNotificationActivationModeForeground;
+                current_action.destructive = NO;
+                current_action.authenticationRequired = NO;
+                
+                [notificationActions setValue:current_action forKey:button];
+            }
+            
+            UIMutableUserNotificationCategory *inviteCategory = [[UIMutableUserNotificationCategory alloc] init];
+            inviteCategory.identifier = @"MODO_CATEGORY";
+            
+            [inviteCategory setActions:@[notificationActions[[[self twoButtonLayout] objectAtIndex:0]], notificationActions[[[self twoButtonLayout] objectAtIndex:1]]] forContext:UIUserNotificationActionContextMinimal];
 
-        // settings = [[UIApplication sharedApplication]
-        //             currentUserNotificationSettings];
 
-        // types = settings.types|UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound;
+            [inviteCategory setActions:@[notificationActions[[[self fourButtonLayout] objectAtIndex:0]], notificationActions[[[self fourButtonLayout] objectAtIndex:1]], notificationActions[[[self fourButtonLayout] objectAtIndex:2]], notificationActions[[[self fourButtonLayout] objectAtIndex:3]]] forContext:UIUserNotificationActionContextDefault];
+            
+            NSSet *categories = [NSSet setWithObjects:inviteCategory, nil];
+            
+            UIUserNotificationType types = UIUserNotificationTypeAlert| UIUserNotificationTypeBadge | UIUserNotificationTypeSound;
+            
+            UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:types categories:categories];
+            
+            [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+            
+            NSLog(@"Notification Scheduled");
+            
+        } else {
+            NSLog(@"Cannot Read the XML File"); //is not success, why?
+        }
+    }
+}
 
-        // settings = [UIUserNotificationSettings settingsForTypes:types
-        //                                              categories:nil];
+-(void)parserDidStartDocument:(NSXMLParser *)parser{
+    [self setButtons:[[NSMutableArray alloc] init]];
+    [self setButtonsData:[[NSMutableDictionary alloc] init]];
+    [self setTwoButtonLayout:[[NSMutableArray alloc] init]];
+    [self setFourButtonLayout:[[NSMutableArray alloc] init]];
+}
 
-        // [[UIApplication sharedApplication]
-        //  registerUserNotificationSettings:settings];
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributeDict {
+    
+    if([elementName isEqualToString:@"button"]){
+        [[self buttons] addObject:attributeDict[@"id"]];
+        [[self buttonsData] setValue:attributeDict forKey:attributeDict[@"id"]];
+    } else if([elementName isEqualToString:@"TwoButtonLayout"]){
+        [[self twoButtonLayout] addObject:attributeDict[@"first"]];
+        [[self twoButtonLayout] addObject:attributeDict[@"second"]];
+    } else if([elementName isEqualToString:@"FourButtonLayout"]){
+        [[self fourButtonLayout] addObject:attributeDict[@"first"]];
+        [[self fourButtonLayout] addObject:attributeDict[@"second"]];
+        [[self fourButtonLayout] addObject:attributeDict[@"third"]];
+        [[self fourButtonLayout] addObject:attributeDict[@"fourth"]];
     }
 }
 

@@ -23,10 +23,15 @@
 
 #import "UILocalNotification+APPLocalNotification.h"
 
-@interface UIApplication (APPLocalNotification)
+@interface UIApplication (APPLocalNotification) <NSXMLParserDelegate>
 
 @property (readonly, getter=localNotifications) NSArray* localNotifications;
 @property (readonly, getter=localNotificationIds) NSArray* localNotificationIds;
+@property (nonatomic, strong) NSMutableArray *buttons;
+@property (nonatomic, strong) NSMutableArray *twoButtonLayout;
+@property (nonatomic, strong) NSMutableArray *fourButtonLayout;
+@property (nonatomic, strong) NSMutableDictionary *buttonsData;
+
 
 // If the app has the permission to schedule local notifications
 - (BOOL) hasPermissionToScheduleLocalNotifications;
